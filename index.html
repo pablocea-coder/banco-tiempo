@@ -4,162 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Banco de Tiempo Socioambiental</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-:root{
-  --teal:#1D9E75;--teal-l:#E1F5EE;--teal-m:#5DCAA5;
-  --amber:#BA7517;--amber-l:#FAEEDA;--amber-m:#EF9F27;
-  --blue:#185FA5;--blue-l:#E6F1FB;--blue-m:#85B7EB;
-  --pink:#993556;--pink-l:#FBEAF0;--pink-m:#ED93B1;
-  --purple:#534AB7;--purple-l:#EEEDFE;--purple-m:#AFA9EC;
-  --coral:#993C1D;--coral-l:#FAECE7;--coral-m:#F0997B;
-  --green:#3B6D11;--green-l:#EAF3DE;--green-m:#97C459;
-  --bg:#f5f5f3;--surface:#fff;--border:#e0dfd8;
-  --text:#1a1a18;--muted:#6b6b66;--hint:#b0b0a8
-}
-body{background:var(--bg);min-height:100vh}
-
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:10}
-.logo{font-size:15px;font-weight:600;color:var(--text)}.logo span{color:var(--teal)}
-.counters{display:flex;gap:16px;font-size:13px;color:var(--muted);align-items:center}
-.counters strong{color:var(--text);font-weight:600}
-.pulse{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;animation:pd 2s ease-in-out infinite;margin-right:5px;vertical-align:middle}
+body{background:#f5f5f3;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e0dfd8;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:10}
+.logo{font-size:15px;font-weight:600;color:#1a1a18}.logo span{color:#1D9E75}
+.counters{display:flex;gap:14px;font-size:13px;color:#6b6b66;align-items:center;flex-wrap:wrap}
+.counters strong{color:#1a1a18}
+.pulse{width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;animation:pd 2s ease-in-out infinite;margin-right:5px;vertical-align:middle}
 @keyframes pd{0%,100%{opacity:1}50%{opacity:.25}}
-
-.tabs{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px}
-.tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--teal);border-bottom-color:var(--teal)}
-
+.status-bar{padding:8px 20px;font-size:12px;text-align:center;background:#FAEEDA;color:#633806;display:none}
+.status-bar.error{background:#FCEBEB;color:#791F1F}
+.status-bar.ok{background:#E1F5EE;color:#085041}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e0dfd8;padding:0 20px}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;color:#6b6b66;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:inherit;transition:all .15s}
+.tab.active{color:#1D9E75;border-bottom-color:#1D9E75}
 .view{display:none}.view.active{display:block}
-
-.main{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);margin:16px 16px 12px;border-radius:14px;border:1px solid var(--border);overflow:hidden;min-height:300px}
-.col{padding:18px}.col:first-child{border-right:1px solid var(--border)}
-.col-hd{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.col-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.col-title{font-size:14px;font-weight:600;color:var(--text)}
-.col-sub{font-size:11px;color:var(--hint);margin-left:auto}
-.cards{display:flex;flex-direction:column;gap:7px;min-height:120px}
-.tcard{border-radius:11px;padding:11px 13px;border:1px solid transparent;animation:ci .35s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes ci{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
-.tc-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.tc-org{font-size:13px;font-weight:600;line-height:1.2}
-.tipo-pill{font-size:10px;padding:3px 9px;border-radius:100px;font-weight:600;display:inline-block;margin-bottom:6px}
-.capa-label{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.6;margin-bottom:3px;margin-top:4px}
+.main{display:grid;grid-template-columns:1fr 1fr;background:#fff;margin:14px;border-radius:14px;border:1px solid #e0dfd8;overflow:hidden}
+.col{padding:16px}.col:first-child{border-right:1px solid #e0dfd8}
+.col-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e0dfd8}
+.col-dot{width:9px;height:9px;border-radius:50%}
+.col-title{font-size:14px;font-weight:600}
+.col-cnt{font-size:11px;color:#b0b0a8;margin-left:auto}
+.cards{display:flex;flex-direction:column;gap:7px;min-height:100px}
+.tcard{border-radius:11px;padding:11px 13px;border:1px solid transparent;animation:ci .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes ci{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.tc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.tc-org{font-size:13px;font-weight:600}
+.tipo-pill{font-size:10px;padding:3px 8px;border-radius:100px;font-weight:600;display:inline-block;margin-bottom:5px}
+.capa-lbl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.55;margin-bottom:2px;margin-top:4px}
 .atag{font-size:10px;padding:2px 7px;border-radius:100px;display:inline-block;margin:1px 1px 1px 0}
-.tc-desc{font-size:11px;opacity:.7;margin-top:6px;line-height:1.45}
-.add-btn{width:100%;padding:10px;border-radius:10px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;margin-top:10px;transition:all .15s;font-family:inherit}
-.add-btn:hover{background:var(--bg);color:var(--text);border-color:#aaa}
-
-.match-sec{margin:0 16px 16px;background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:18px}
-.mhd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.m-title{font-size:14px;font-weight:600;color:var(--text)}
-.m-badge{font-size:11px;background:var(--teal-l);color:var(--teal);padding:3px 10px;border-radius:100px;font-weight:600}
-.m-hint{font-size:12px;color:var(--hint);margin-left:auto}
+.tc-desc{font-size:11px;opacity:.7;margin-top:5px;line-height:1.4}
+.add-btn{width:100%;padding:10px;border-radius:10px;border:1.5px dashed #e0dfd8;background:transparent;color:#6b6b66;cursor:pointer;font-size:13px;margin-top:10px;transition:all .15s;font-family:inherit}
+.add-btn:hover{background:#f5f5f3;color:#1a1a18}
+.match-sec{margin:0 14px 14px;background:#fff;border-radius:14px;border:1px solid #e0dfd8;padding:16px}
+.mhd{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.m-title{font-size:14px;font-weight:600}
+.m-badge{font-size:11px;background:#E1F5EE;color:#1D9E75;padding:3px 10px;border-radius:100px;font-weight:600}
 .matches-row{display:flex;gap:10px;flex-wrap:wrap}
-.mc{background:#fff;border:1px solid var(--teal-m);border-radius:12px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;animation:mi .5s cubic-bezier(.34,1.56,.64,1) both;max-width:320px}
+.mc{background:#fff;border:1px solid #5DCAA5;border-radius:12px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;animation:mi .5s cubic-bezier(.34,1.56,.64,1) both;max-width:300px}
 @keyframes mi{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
-.mc-icon{width:40px;height:40px;border-radius:50%;background:var(--teal-l);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;margin-top:2px}
-.mc-orgs{font-size:13px;font-weight:600;line-height:1.4;color:var(--text)}
-.mc-tipo{font-size:11px;color:var(--teal);font-weight:600;margin-top:3px}
-.mc-area{font-size:10px;color:var(--muted);margin-top:1px;margin-bottom:8px}
-.mc-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--teal-m);background:transparent;color:var(--teal);cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:all .15s}
-.mc-btn:hover{background:var(--teal-l)}
-.no-match{font-size:12px;color:var(--hint);padding:6px 0}
-
-/* Compromisos view */
-.compromisos-list{padding:16px}
-.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
-.comp-card.done{border-color:var(--teal-m);background:var(--teal-l)}
-.comp-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.mc-icon{width:38px;height:38px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:2px}
+.mc-orgs{font-size:13px;font-weight:600;line-height:1.4}
+.mc-tipo{font-size:11px;color:#1D9E75;font-weight:600;margin-top:2px}
+.mc-area{font-size:10px;color:#6b6b66;margin-top:1px;margin-bottom:7px}
+.mc-btn{padding:5px 11px;border-radius:7px;border:1px solid #5DCAA5;background:transparent;color:#1D9E75;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit}
+.no-match{font-size:12px;color:#b0b0a8;padding:4px 0}
+.comp-list{padding:14px}
+.comp-card{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px}
+.comp-card.done{border-color:#5DCAA5;background:#E1F5EE}
+.comp-icon{font-size:20px;flex-shrink:0;margin-top:2px}
 .comp-body{flex:1}
-.comp-orgs{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
-.comp-meta{font-size:12px;color:var(--muted);margin-bottom:6px}
-.comp-fecha{font-size:12px;color:var(--muted);margin-bottom:8px}
+.comp-orgs{font-size:14px;font-weight:600;margin-bottom:3px}
+.comp-meta{font-size:12px;color:#6b6b66;margin-bottom:5px}
 .comp-status{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-bottom:8px}
-.status-comprometido{background:var(--amber-l);color:var(--amber)}
-.status-completado{background:var(--teal-l);color:var(--teal)}
-.comp-actions{display:flex;gap:8px;flex-wrap:wrap}
-.cbtn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;transition:all .15s}
-.cbtn:hover{background:var(--bg)}
-.cbtn.green{border-color:var(--teal-m);color:var(--teal)}
-.cbtn.green:hover{background:var(--teal-l)}
-.cbtn.whatsapp{background:#25D366;color:#fff;border-color:#25D366}
-.cbtn.whatsapp:hover{opacity:.88}
-.no-comp{text-align:center;color:var(--hint);font-size:13px;padding:3rem 0}
-
-/* Modal */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.s-pend{background:#FAEEDA;color:#BA7517}
+.s-done{background:#E1F5EE;color:#1D9E75}
+.comp-actions{display:flex;gap:7px;flex-wrap:wrap}
+.cbtn{padding:6px 12px;border-radius:8px;border:1px solid #e0dfd8;background:#fff;color:#1a1a18;cursor:pointer;font-size:12px;font-weight:500;font-family:inherit}
+.cbtn.g{border-color:#5DCAA5;color:#1D9E75}.cbtn.w{background:#25D366;color:#fff;border-color:#25D366}
+.no-comp{text-align:center;color:#b0b0a8;font-size:13px;padding:3rem 0}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
 .overlay.open{display:flex}
-.modal{background:#fff;border-radius:18px;padding:26px;width:100%;max-width:460px;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-.modal h3{font-size:17px;font-weight:600;margin-bottom:6px;color:var(--text)}
-.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.5}
-.regla{background:var(--teal-l);border:1px solid var(--teal-m);border-radius:10px;padding:10px 14px;font-size:12px;color:#085041;margin-bottom:18px;line-height:1.5}
-.regla strong{font-weight:600}
-.f{margin-bottom:16px}
-.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
-.f input,.f textarea,.f select{width:100%;font-size:14px;padding:10px 13px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;font-family:inherit;transition:border-color .15s}
-.f input:focus,.f textarea:focus{border-color:var(--teal)}
-.f textarea{min-height:60px;resize:vertical}
-.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:5px}
-.topt{padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:500;text-align:center;transition:all .15s;color:var(--muted);font-family:inherit;line-height:1.3}
-.topt:hover{border-color:#aaa;color:var(--text);background:var(--bg)}
-.capa-section{margin-bottom:10px}
-.capa-hd{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--hint);margin-bottom:6px;margin-top:8px}
-.achips{display:flex;flex-wrap:wrap;gap:5px}
-.achip{padding:4px 11px;border-radius:100px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;transition:all .12s}
-.achip:hover{border-color:#aaa;color:var(--text)}
-.check-row{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border-radius:10px;padding:12px;cursor:pointer}
-.check-row input{margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:var(--teal)}
-.check-row span{font-size:12px;color:var(--muted);line-height:1.5}
-.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
-.btn{padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:all .15s}
-.btn:hover{background:var(--bg)}
-.btn.ok{background:var(--text);color:#fff;border-color:transparent}
-.btn.ok:hover{opacity:.85}
-
-/* Modal confirmar match */
-.match-modal{background:#fff;border-radius:18px;padding:26px;width:100%;max-width:400px;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-.match-modal h3{font-size:17px;font-weight:600;margin-bottom:16px}
-
-/* Boom */
+.modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:440px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:5px}
+.modal-sub{font-size:12px;color:#6b6b66;margin-bottom:14px;line-height:1.5}
+.regla{background:#E1F5EE;border:1px solid #5DCAA5;border-radius:10px;padding:10px 13px;font-size:12px;color:#085041;margin-bottom:14px;line-height:1.5}
+.f{margin-bottom:14px}
+.f label{display:block;font-size:12px;color:#6b6b66;margin-bottom:4px;font-weight:500}
+.f input,.f textarea,.f select{width:100%;font-size:14px;padding:9px 12px;border-radius:9px;border:1px solid #e0dfd8;background:#fff;color:#1a1a18;outline:none;font-family:inherit}
+.f input:focus,.f textarea:focus{border-color:#1D9E75}
+.f textarea{min-height:56px;resize:vertical}
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.topt{padding:9px 7px;border-radius:9px;border:1px solid #e0dfd8;background:#fff;cursor:pointer;font-size:12px;font-weight:500;text-align:center;transition:all .15s;color:#6b6b66;font-family:inherit;line-height:1.3}
+.capa-hd{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#b0b0a8;margin:8px 0 5px}
+.achips{display:flex;flex-wrap:wrap;gap:4px}
+.achip{padding:4px 10px;border-radius:100px;font-size:12px;cursor:pointer;border:1px solid #e0dfd8;background:#fff;color:#6b6b66;font-family:inherit;transition:all .12s}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn{padding:8px 16px;border-radius:9px;border:1px solid #e0dfd8;background:#fff;color:#1a1a18;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit}
+.btn.ok{background:#1a1a18;color:#fff;border-color:transparent}
+.match-modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:380px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.match-modal h3{font-size:16px;font-weight:600;margin-bottom:14px}
 .boom-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
 .boom-ov.show{display:flex}
-.boom-box{background:#fff;border-radius:24px;padding:40px 44px;text-align:center;max-width:380px;width:90%;animation:bi .55s cubic-bezier(.34,1.56,.64,1) both}
+.boom-box{background:#fff;border-radius:22px;padding:36px 40px;text-align:center;max-width:360px;width:90%;animation:bi .5s cubic-bezier(.34,1.56,.64,1) both}
 @keyframes bi{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:scale(1)}}
-.b-ico{font-size:60px;margin-bottom:10px;display:block;animation:bs .65s ease-in-out}
-@keyframes bs{from{transform:rotate(-20deg) scale(.3)}to{transform:rotate(0) scale(1)}}
-.b-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
-.b-title{font-size:13px;color:var(--muted);margin-bottom:8px}
-.b-orgs{font-size:17px;font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.5}
-.b-tipo{font-size:13px;font-weight:600;padding:5px 16px;border-radius:100px;display:inline-block;margin-bottom:16px}
-.b-actions{display:flex;flex-direction:column;gap:8px;width:100%}
-.b-btn{padding:11px;border-radius:11px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;transition:all .15s;width:100%}
-.b-btn:hover{background:var(--bg)}
-.b-btn.primary{background:var(--text);color:#fff;border-color:transparent}
-.b-btn.primary:hover{opacity:.85}
+.b-ico{font-size:56px;margin-bottom:8px;display:block}
+.b-label{font-size:11px;font-weight:700;color:#1D9E75;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.b-orgs{font-size:17px;font-weight:600;margin-bottom:8px;line-height:1.5}
+.b-tipo{font-size:13px;font-weight:600;padding:4px 14px;border-radius:100px;display:inline-block;margin-bottom:18px}
+.b-actions{display:flex;flex-direction:column;gap:8px}
+.b-btn{padding:10px;border-radius:10px;border:1px solid #e0dfd8;background:#fff;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;width:100%}
+.b-btn.primary{background:#1a1a18;color:#fff;border-color:transparent}
 .cw{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:201}
 .cf{position:absolute;border-radius:2px;animation:cf linear forwards}
-@keyframes cf{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(900deg);opacity:0}}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:300;animation:tin .3s ease both;pointer-events:none}
+@keyframes cf{0%{opacity:1;transform:translateY(-10px) rotate(0)}100%{opacity:0;transform:translateY(110vh) rotate(900deg)}}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;z-index:300;animation:tin .3s ease both;pointer-events:none;white-space:nowrap}
 .toast.out{animation:tout .3s ease both}
-@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes tout{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(10px)}}
-
-@media(max-width:600px){
-  .main{grid-template-columns:1fr;margin:10px}
-  .col:first-child{border-right:none;border-bottom:1px solid var(--border)}
-  .match-sec{margin:0 10px 10px}
-  .tipo-grid{grid-template-columns:1fr}
-  .boom-box{padding:28px 22px}
-}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tout{to{opacity:0;transform:translateX(-50%) translateY(8px)}}
+@media(max-width:580px){.main{grid-template-columns:1fr}.col:first-child{border-right:none;border-bottom:1px solid #e0dfd8}.match-sec{margin:0 10px 10px}.tipo-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
+<div class="status-bar" id="sbar">Conectando...</div>
 <div class="topbar">
   <div class="logo">banco de tiempo <span>socioambiental</span></div>
   <div class="counters">
@@ -169,68 +119,40 @@ body{background:var(--bg);min-height:100vh}
     <span>completados: <strong id="c-done">0</strong></span>
   </div>
 </div>
-
-<div style="display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 24px">
+<div class="tabs">
   <button class="tab active" onclick="showTab('tablero',this)">tablero</button>
-  <button class="tab" onclick="showTab('compromisos',this)">compromisos <span id="comp-badge" style="background:var(--amber-l);color:var(--amber);font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600;display:none">0</span></button>
+  <button class="tab" onclick="showTab('compromisos',this)">compromisos <span id="comp-badge" style="display:none;background:#FAEEDA;color:#BA7517;font-size:10px;padding:1px 6px;border-radius:100px;font-weight:600">0</span></button>
 </div>
-
-<!-- TABLERO -->
 <div class="view active" id="view-tablero">
   <div class="main">
     <div class="col">
-      <div class="col-hd">
-        <div class="col-dot" style="background:var(--teal)"></div>
-        <div class="col-title">ofrezco</div>
-        <div class="col-sub" id="c-of">0 tarjetas</div>
-      </div>
+      <div class="col-hd"><div class="col-dot" style="background:#1D9E75"></div><div class="col-title">ofrezco</div><div class="col-cnt" id="c-of">0 tarjetas</div></div>
       <div class="cards" id="list-of"></div>
       <button class="add-btn" onclick="openModal('ofrece')">+ agregar lo que ofrezco</button>
     </div>
     <div class="col">
-      <div class="col-hd">
-        <div class="col-dot" style="background:var(--amber)"></div>
-        <div class="col-title">necesito</div>
-        <div class="col-sub" id="c-ne">0 tarjetas</div>
-      </div>
+      <div class="col-hd"><div class="col-dot" style="background:#BA7517"></div><div class="col-title">necesito</div><div class="col-cnt" id="c-ne">0 tarjetas</div></div>
       <div class="cards" id="list-ne"></div>
       <button class="add-btn" onclick="openModal('necesita')">+ agregar lo que necesito</button>
     </div>
   </div>
   <div class="match-sec">
-    <div class="mhd">
-      <div class="m-title">matches</div>
-      <div class="m-badge" id="m-badge">0 encontrados</div>
-      <div class="m-hint">coincidencia de tipo + área</div>
-    </div>
-    <div class="matches-row" id="matches-row">
-      <div class="no-match">aún no hay matches — agrega tarjetas para comenzar ✨</div>
-    </div>
+    <div class="mhd"><div class="m-title">matches</div><div class="m-badge" id="m-badge">0 encontrados</div><div style="font-size:12px;color:#b0b0a8">coincidencia de tipo + área</div></div>
+    <div class="matches-row" id="matches-row"><div class="no-match">aún no hay matches ✨</div></div>
   </div>
 </div>
-
-<!-- COMPROMISOS -->
 <div class="view" id="view-compromisos">
-  <div class="compromisos-list" id="comp-list">
-    <div class="no-comp">aún no hay compromisos registrados</div>
-  </div>
+  <div class="comp-list" id="comp-list"><div class="no-comp">aún no hay compromisos</div></div>
 </div>
-
-<!-- Modal agregar tarjeta -->
 <div class="overlay" id="overlay">
 <div class="modal">
   <h3 id="modal-title">agregar tarjeta</h3>
-  <div class="modal-sub">cada intercambio es una reunión de máximo 1 hora — presencial o virtual. puede repetirse si ambas orgs lo acuerdan.</div>
-  <div class="regla">
-    <strong>regla del banco de tiempo:</strong> todos los intercambios tienen el mismo valor — 1 hora de escucha vale igual que 1 hora de capacitación.
-  </div>
-  <div class="f">
-    <label>nombre de tu organización *</label>
-    <input type="text" id="m-org" placeholder="Ej: Colectivo Raíz">
-  </div>
+  <div class="modal-sub">cada intercambio es una reunión de máximo 1 hora — presencial o virtual.</div>
+  <div class="regla"><strong>regla:</strong> 1 hora vale igual para todos, sin importar qué se intercambia.</div>
+  <div class="f"><label>nombre de tu organización *</label><input type="text" id="m-org" placeholder="Ej: Colectivo Raíz"></div>
   <div class="f">
     <label>tipo de intercambio *</label>
-    <div class="tipo-grid" id="tipo-grid">
+    <div class="tipo-grid">
       <button class="topt" data-t="Enseño algo" onclick="selTipo(this)">★ Enseño algo</button>
       <button class="topt" data-t="Pienso contigo" onclick="selTipo(this)">◆ Pienso contigo</button>
       <button class="topt" data-t="Te escucho" onclick="selTipo(this)">♥ Te escucho</button>
@@ -242,129 +164,122 @@ body{background:var(--bg);min-height:100vh}
   </div>
   <div class="f">
     <label>área temática (hasta 3) *</label>
-    <div class="capa-section">
-      <div class="capa-hd">conmigo mismo</div>
-      <div class="achips" id="chips-conmigo"></div>
-    </div>
-    <div class="capa-section">
-      <div class="capa-hd">con otros</div>
-      <div class="achips" id="chips-otros"></div>
-    </div>
-    <div class="capa-section">
-      <div class="capa-hd">con el entorno</div>
-      <div class="achips" id="chips-entorno"></div>
-    </div>
+    <div class="capa-hd">conmigo mismo</div><div class="achips" id="chips-conmigo"></div>
+    <div class="capa-hd">con otros</div><div class="achips" id="chips-otros"></div>
+    <div class="capa-hd">con el entorno</div><div class="achips" id="chips-entorno"></div>
   </div>
-  <div class="f">
-    <label>descríbelo en una línea</label>
-    <textarea id="m-desc" placeholder="Ej: Puedo acompañar una sesión de escucha para equipos en momentos de desgaste o conflicto"></textarea>
-  </div>
+  <div class="f"><label>descríbelo en una línea</label><textarea id="m-desc" placeholder="Ej: Puedo facilitar una sesión de escucha para equipos en momentos de desgaste"></textarea></div>
   <div class="mbtns">
     <button class="btn" onclick="closeModal()">cancelar</button>
     <button class="btn ok" id="btn-guardar" onclick="guardar()">agregar tarjeta</button>
   </div>
 </div>
 </div>
-
-<!-- Modal confirmar match -->
 <div class="overlay" id="overlay-match">
 <div class="match-modal">
   <h3>confirmar compromiso</h3>
   <div id="conf-content"></div>
-  <div class="f" style="margin-top:16px">
-    <label>fecha tentativa del intercambio</label>
-    <input type="date" id="conf-fecha">
-  </div>
-  <div class="f">
-    <label>modalidad</label>
-    <select id="conf-modalidad">
-      <option value="virtual">Virtual (videollamada)</option>
-      <option value="presencial">Presencial</option>
-    </select>
+  <div class="f" style="margin-top:14px"><label>fecha tentativa *</label><input type="date" id="conf-fecha"></div>
+  <div class="f"><label>modalidad</label>
+    <select id="conf-modalidad"><option value="virtual">Virtual (videollamada)</option><option value="presencial">Presencial</option></select>
   </div>
   <div class="mbtns">
     <button class="btn" onclick="closeMatchModal()">cancelar</button>
-    <button class="btn ok" onclick="confirmarMatch()">comprometer intercambio</button>
+    <button class="btn ok" onclick="confirmarMatch()">comprometer</button>
   </div>
 </div>
 </div>
-
-<!-- Boom -->
 <div class="boom-ov" id="boom">
   <div class="cw" id="cw"></div>
   <div class="boom-box">
     <span class="b-ico" id="b-ico">✨</span>
     <div class="b-label">match detectado</div>
-    <div class="b-title" id="b-title"></div>
+    <div id="b-title" style="font-size:13px;color:#6b6b66;margin-bottom:6px"></div>
     <div class="b-orgs" id="b-orgs"></div>
     <div class="b-tipo" id="b-tipo"></div>
     <div class="b-actions">
-      <button class="b-btn primary" id="b-confirm-btn" onclick="openMatchModal()">comprometer intercambio</button>
+      <button class="b-btn primary" onclick="openMatchModal()">comprometer intercambio</button>
       <button class="b-btn" onclick="closeBoom()">ver después</button>
     </div>
   </div>
 </div>
-
 <script>
+const SUPABASE_URL = 'https://cavrryznstzyzkhtlovz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhdnJyeXpuc3R6eXpraHRsb3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDM5MzQsImV4cCI6MjA4OTUxOTkzNH0.auEPVNjMQ1PYnmF8ef_uyGJJxNLyWEsJg56pmYIx8iw';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const CAPAS={
   conmigo:{label:'Conmigo mismo',areas:['Propósito e identidad','Cultura organizacional','Cuidado de equipos','Prevención del burnout','Liderazgo','Toma de decisiones','Gestión del conflicto','Comunicación interna','Salud mental colectiva']},
   otros:{label:'Con otros',areas:['Facilitación participativa','Narrativa y comunicación pública','Incidencia y advocacy','Alianzas y articulación','Fundraising','Gestión de proyectos','Legal y constitución','Evaluación y aprendizaje','Negociación','Trabajo intersectorial','Comunicación digital','Producción audiovisual']},
   entorno:{label:'Con el entorno',areas:['Gobernanza territorial','Adaptación climática','Biodiversidad y ecosistemas','Agua y cuencas','Incendios y riesgo','Datos y monitoreo ambiental','Ciencia comunitaria','Justicia ambiental','Agroecología','Economía regenerativa','Tecnología para el bien común','Memoria territorial']}
 };
-const SUPA_URL='https://cavrryznstzyzkhtlovz.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhdnJyeXpuc3R6eXpraHRsb3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDM5MzQsImV4cCI6MjA4OTUxOTkzNH0.auEPVNjMQ1PYnmF8ef_uyGJJxNLyWEsJg56pmYIx8iw';
-
 const TIPOS={
-  'Enseño algo':      {bg:'#E6F1FB',txt:'#0C447C',border:'#85B7EB',icon:'★'},
-  'Pienso contigo':   {bg:'#EEEDFE',txt:'#3C3489',border:'#AFA9EC',icon:'◆'},
-  'Te escucho':       {bg:'#FBEAF0',txt:'#72243E',border:'#ED93B1',icon:'♥'},
+  'Enseño algo':{bg:'#E6F1FB',txt:'#0C447C',border:'#85B7EB',icon:'★'},
+  'Pienso contigo':{bg:'#EEEDFE',txt:'#3C3489',border:'#AFA9EC',icon:'◆'},
+  'Te escucho':{bg:'#FBEAF0',txt:'#72243E',border:'#ED93B1',icon:'♥'},
   'Reviso tu trabajo':{bg:'#FAEEDA',txt:'#633806',border:'#EF9F27',icon:'▲'},
-  'Te conecto':       {bg:'#EAF3DE',txt:'#27500A',border:'#97C459',icon:'⬡'},
-  'Hago contigo':     {bg:'#FAECE7',txt:'#712B13',border:'#F0997B',icon:'●'},
-  'Te acompaño':      {bg:'#E1F5EE',txt:'#085041',border:'#5DCAA5',icon:'◎'}
+  'Te conecto':{bg:'#EAF3DE',txt:'#27500A',border:'#97C459',icon:'⬡'},
+  'Hago contigo':{bg:'#FAECE7',txt:'#712B13',border:'#F0997B',icon:'●'},
+  'Te acompaño':{bg:'#E1F5EE',txt:'#085041',border:'#5DCAA5',icon:'◎'}
 };
-const CAPA_COLORS={
-  conmigo:{bg:'#EEEDFE',txt:'#3C3489',border:'#AFA9EC'},
-  otros:  {bg:'#E6F1FB',txt:'#0C447C',border:'#85B7EB'},
-  entorno:{bg:'#EAF3DE',txt:'#27500A',border:'#97C459'}
-};
-const CONFETTI=['#1D9E75','#BA7517','#534AB7','#993556','#185FA5','#EF9F27','#5DCAA5','#ED93B1','#97C459','#F0997B'];
+const CC={conmigo:{bg:'#EEEDFE',txt:'#3C3489',border:'#AFA9EC'},otros:{bg:'#E6F1FB',txt:'#0C447C',border:'#85B7EB'},entorno:{bg:'#EAF3DE',txt:'#27500A',border:'#97C459'}};
+const CONF=['#1D9E75','#BA7517','#534AB7','#993556','#185FA5','#EF9F27','#5DCAA5','#ED93B1','#97C459','#F0997B'];
 
-let cards=[],compromisos=[],selAreas=new Set(),curMode='ofrece',curTipo='',tipoBtnEl=null,knownMatches=new Set(),pendingMatch=null;
+let cards=[],compromisos=[],selAreas=new Set(),curMode='ofrece',curTipo='',tipoBtnEl=null,knownMatches=new Set(),pendingMatch=null,saving=false;
 
 function ini(n){return n.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'}
-function getCapaDeArea(a){for(const[k,c]of Object.entries(CAPAS)){if(c.areas.includes(a))return k}return null}
+function getCapa(a){for(const[k,c]of Object.entries(CAPAS)){if(c.areas.includes(a))return k}return null}
+function setStatus(msg,type=''){const b=document.getElementById('sbar');b.textContent=msg;b.className='status-bar'+(type?' '+type:'');b.style.display=msg?'block':'none'}
 
-function showTab(tab,btn){
+async function cargar(){
+  setStatus('Conectando con el servidor...');
+  const {data,error}=await sb.from('tarjetas').select('*').order('created_at',{ascending:true});
+  if(error){setStatus('Error al conectar: '+error.message,'error');return}
+  cards=data.map(r=>({id:r.id,org:r.org,ini:ini(r.org),tipo:r.tipo,areas:r.areas,desc:r.descripcion||'',mode:r.modo}));
+  setStatus('');
+  render();
+  suscribir();
+}
+
+function suscribir(){
+  sb.channel('tarjetas-canal')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tarjetas'},payload=>{
+      const r=payload.new;
+      if(!cards.find(c=>c.id===r.id)){
+        cards.push({id:r.id,org:r.org,ini:ini(r.org),tipo:r.tipo,areas:r.areas,desc:r.descripcion||'',mode:r.modo});
+        render();
+      }
+    })
+    .subscribe();
+}
+
+function showTab(t,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('view-'+tab).classList.add('active');
-  btn.classList.add('active');
-  if(tab==='compromisos')renderCompromisos();
+  document.getElementById('view-'+t).classList.add('active');btn.classList.add('active');
+  if(t==='compromisos')renderCompromisos();
 }
 
 function openModal(mode){
   curMode=mode;curTipo='';selAreas.clear();tipoBtnEl=null;
-  document.getElementById('m-org').value='';
-  document.getElementById('m-desc').value='';
+  document.getElementById('m-org').value='';document.getElementById('m-desc').value='';
   document.getElementById('modal-title').textContent=mode==='ofrece'?'¿qué ofrezco? (1 hora)':'¿qué necesito? (1 hora)';
   document.querySelectorAll('.topt').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor=''});
-  renderChips();
-  document.getElementById('overlay').classList.add('open');
+  renderChips();document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('m-org').focus(),100);
 }
 function closeModal(){document.getElementById('overlay').classList.remove('open')}
+
 function selTipo(btn){
   if(tipoBtnEl){tipoBtnEl.style.background='';tipoBtnEl.style.color='';tipoBtnEl.style.borderColor=''}
   const t=btn.getAttribute('data-t'),c=TIPOS[t]||{};
-  curTipo=t;tipoBtnEl=btn;
-  btn.style.background=c.bg;btn.style.color=c.txt;btn.style.borderColor=c.border;
+  curTipo=t;tipoBtnEl=btn;btn.style.background=c.bg;btn.style.color=c.txt;btn.style.borderColor=c.border;
 }
 
 function renderChips(){
   Object.entries(CAPAS).forEach(([key,capa])=>{
     const cont=document.getElementById('chips-'+key);cont.innerHTML='';
-    const col=CAPA_COLORS[key];
+    const col=CC[key];
     capa.areas.forEach(a=>{
       const b=document.createElement('button');b.className='achip';b.textContent=a;
       if(selAreas.has(a)){b.style.background=col.bg;b.style.color=col.txt;b.style.borderColor=col.border}
@@ -374,30 +289,34 @@ function renderChips(){
   });
 }
 
-function guardar(){
+async function guardar(){
+  if(saving)return;
   const org=document.getElementById('m-org').value.trim();
   if(!org){alert('Ingresa el nombre de la organización');return}
   if(!curTipo){alert('Selecciona el tipo de intercambio');return}
   if(!selAreas.size){alert('Selecciona al menos un área temática');return}
-  cards.push({id:Date.now(),org,ini:ini(org),tipo:curTipo,areas:[...selAreas],desc:document.getElementById('m-desc').value.trim(),mode:curMode});
-  closeModal();render();
+  saving=true;
+  const btn=document.getElementById('btn-guardar');btn.textContent='guardando...';btn.disabled=true;
+  const {data,error}=await sb.from('tarjetas').insert({
+    org,modo:curMode,tipo:curTipo,areas:[...selAreas],descripcion:document.getElementById('m-desc').value.trim()
+  }).select();
+  saving=false;btn.textContent='agregar tarjeta';btn.disabled=false;
+  if(error){alert('Error: '+error.message);return}
+  closeModal();toast('Tarjeta agregada ✓');
 }
 
 function render(){
-  const of=cards.filter(c=>c.mode==='ofrece');
-  const ne=cards.filter(c=>c.mode==='necesita');
+  const of=cards.filter(c=>c.mode==='ofrece'),ne=cards.filter(c=>c.mode==='necesita');
   const orgs=new Set(cards.map(c=>c.org));
-  const done=compromisos.filter(c=>c.status==='completado').length;
   document.getElementById('c-orgs').textContent=orgs.size;
   document.getElementById('c-of').textContent=of.length+' tarjeta'+(of.length!==1?'s':'');
   document.getElementById('c-ne').textContent=ne.length+' tarjeta'+(ne.length!==1?'s':'');
-  document.getElementById('c-done').textContent=done;
+  document.getElementById('c-done').textContent=compromisos.filter(c=>c.status==='completado').length;
   renderList('list-of',of);renderList('list-ne',ne);
   const matches=calcMatches(of,ne);
   document.getElementById('c-matches').textContent=matches.length;
   document.getElementById('m-badge').textContent=matches.length+' encontrado'+(matches.length!==1?'s':'');
-  renderMatches(matches);
-  updateCompBadge();
+  renderMatches(matches);updateCompBadge();
   const newM=matches.find(m=>!knownMatches.has(m.key));
   if(newM){knownMatches.add(newM.key);showBoom(newM)}
 }
@@ -406,49 +325,39 @@ function renderList(id,items){
   const c=document.getElementById(id);c.innerHTML='';
   items.forEach(card=>{
     const col=TIPOS[card.tipo]||{bg:'#F1EFE8',txt:'#444441',border:'#B4B2A9',icon:''};
-    const abl={};
-    card.areas.forEach(a=>{const k=getCapaDeArea(a)||'otros';if(!abl[k])abl[k]=[];abl[k].push(a)});
+    const abl={};card.areas.forEach(a=>{const k=getCapa(a)||'otros';if(!abl[k])abl[k]=[];abl[k].push(a)});
     let lh='';
     Object.entries(abl).forEach(([key,areas])=>{
-      const lc=CAPA_COLORS[key]||{bg:'#F1EFE8',txt:'#444441',border:'#B4B2A9'};
-      lh+=`<div class="capa-label" style="color:${col.txt}">${CAPAS[key]?.label||key}</div>`;
+      const lc=CC[key]||{bg:'#F1EFE8',txt:'#444441',border:'#B4B2A9'};
+      lh+=`<div class="capa-lbl" style="color:${col.txt}">${CAPAS[key]?.label||key}</div>`;
       lh+=areas.map(a=>`<span class="atag" style="background:${lc.bg};color:${lc.txt};border:1px solid ${lc.border}">${a}</span>`).join('');
     });
-    const d=document.createElement('div');d.className='tcard';
-    d.style.background=col.bg;d.style.borderColor=col.border;
-    d.innerHTML=`<div class="tc-top"><div class="av" style="background:${col.border}66;color:${col.txt}">${card.ini}</div><div class="tc-org" style="color:${col.txt}">${card.org}</div></div><span class="tipo-pill" style="background:${col.border}55;color:${col.txt}">${col.icon} ${card.tipo}</span><div>${lh}</div>${card.desc?`<div class="tc-desc" style="color:${col.txt}">${card.desc}</div>`:''}`;
+    const d=document.createElement('div');d.className='tcard';d.style.background=col.bg;d.style.borderColor=col.border;
+    d.innerHTML=`<div class="tc-top"><div class="av" style="background:${col.border}55;color:${col.txt}">${card.ini}</div><div class="tc-org" style="color:${col.txt}">${card.org}</div></div><span class="tipo-pill" style="background:${col.border}55;color:${col.txt}">${col.icon} ${card.tipo}</span><div>${lh}</div>${card.desc?`<div class="tc-desc" style="color:${col.txt}">${card.desc}</div>`:''}`;
     c.appendChild(d);
   });
 }
 
 function calcMatches(of,ne){
-  const matches=[];
+  const m=[];
   of.forEach(o=>ne.forEach(n=>{
     if(o.org===n.org||o.tipo!==n.tipo)return;
-    const comun=o.areas.filter(a=>n.areas.includes(a));
-    if(!comun.length)return;
+    const comun=o.areas.filter(a=>n.areas.includes(a));if(!comun.length)return;
     const key=[o.org,n.org,o.tipo].sort().join('||');
-    if(!matches.find(m=>m.key===key))matches.push({key,of:o,ne:n,tipo:o.tipo,areas:comun});
+    if(!m.find(x=>x.key===key))m.push({key,of:o,ne:n,tipo:o.tipo,areas:comun});
   }));
-  return matches;
+  return m;
 }
 
 function renderMatches(matches){
   const row=document.getElementById('matches-row');
-  if(!matches.length){row.innerHTML='<div class="no-match">aún no hay matches — agrega tarjetas para comenzar ✨</div>';return}
+  if(!matches.length){row.innerHTML='<div class="no-match">aún no hay matches ✨</div>';return}
   row.innerHTML='';
   matches.forEach(m=>{
     const col=TIPOS[m.tipo]||{icon:'✓',bg:'#E1F5EE'};
     const yaComp=compromisos.find(c=>c.key===m.key);
     const d=document.createElement('div');d.className='mc';
-    d.innerHTML=`<div class="mc-icon" style="background:${col.bg}">${col.icon}</div>
-      <div>
-        <div class="mc-orgs">${m.of.org}<br>→ ${m.ne.org}</div>
-        <div class="mc-tipo">${m.tipo}</div>
-        <div class="mc-area">${m.areas.join(' · ')}</div>
-        ${yaComp?`<span style="font-size:10px;font-weight:600;color:var(--teal)">✓ comprometido</span>`:
-        `<button class="mc-btn" onclick='openMatchConfirm(${JSON.stringify(m)})'>comprometer →</button>`}
-      </div>`;
+    d.innerHTML=`<div class="mc-icon" style="background:${col.bg}">${col.icon}</div><div><div class="mc-orgs">${m.of.org}<br>→ ${m.ne.org}</div><div class="mc-tipo">${m.tipo}</div><div class="mc-area">${m.areas.join(' · ')}</div>${yaComp?`<span style="font-size:10px;font-weight:700;color:#1D9E75">✓ comprometido</span>`:`<button class="mc-btn" onclick='openMatchConfirm(${JSON.stringify(m)})'>comprometer →</button>`}</div>`;
     row.appendChild(d);
   });
 }
@@ -459,130 +368,67 @@ function showBoom(m){
   document.getElementById('b-ico').textContent=col.icon;
   document.getElementById('b-title').textContent=m.areas.join(' · ');
   document.getElementById('b-orgs').innerHTML=`<strong>${m.of.org}</strong><br>ofrece a<br><strong>${m.ne.org}</strong>`;
-  const bt=document.getElementById('b-tipo');
-  bt.textContent=col.icon+' '+m.tipo;
-  bt.style.background=col.bg;bt.style.color=col.txt;bt.style.border='1px solid '+col.border;
-  confetti();
-  document.getElementById('boom').classList.add('show');
+  const bt=document.getElementById('b-tipo');bt.textContent=col.icon+' '+m.tipo;bt.style.background=col.bg;bt.style.color=col.txt;bt.style.border='1px solid '+col.border;
+  confetti();document.getElementById('boom').classList.add('show');
 }
-function closeBoom(){document.getElementById('boom').classList.remove('show');pendingMatch=null}
-
-function openMatchModal(){
-  closeBoom();
-  if(pendingMatch)openMatchConfirm(pendingMatch);
-}
+function closeBoom(){document.getElementById('boom').classList.remove('show')}
+function openMatchModal(){closeBoom();if(pendingMatch)openMatchConfirm(pendingMatch)}
 
 function openMatchConfirm(m){
   pendingMatch=m;
   const col=TIPOS[m.tipo]||{bg:'#E1F5EE',txt:'#085041',icon:'✨'};
-  document.getElementById('conf-content').innerHTML=`
-    <div style="background:${col.bg};border-radius:10px;padding:12px 14px;margin-bottom:8px">
-      <div style="font-size:13px;font-weight:600;color:${col.txt};margin-bottom:4px">${col.icon} ${m.tipo}</div>
-      <div style="font-size:13px;font-weight:600">${m.of.org} → ${m.ne.org}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px">${m.areas.join(' · ')}</div>
-    </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.6">al confirmar, ambas organizaciones quedan comprometidas a reunirse en un máximo de <strong>1 hora</strong>. cuando el intercambio ocurra, recuerden sacar una foto y compartirla en el grupo de WhatsApp de la red.</p>`;
-  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('conf-content').innerHTML=`<div style="background:${col.bg};border-radius:10px;padding:11px 13px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;color:${col.txt};margin-bottom:3px">${col.icon} ${m.tipo}</div><div style="font-size:13px;font-weight:600">${m.of.org} → ${m.ne.org}</div><div style="font-size:12px;color:#6b6b66;margin-top:2px">${m.areas.join(' · ')}</div></div><p style="font-size:12px;color:#6b6b66;line-height:1.6">quedan comprometidas a reunirse máximo <strong>1 hora</strong>. cuando ocurra, saquen una foto 📸 y compártanla en el grupo WhatsApp.</p>`;
   document.getElementById('conf-fecha').value='';
-  document.getElementById('conf-fecha').min=today;
   document.getElementById('overlay-match').classList.add('open');
 }
 function closeMatchModal(){document.getElementById('overlay-match').classList.remove('open')}
 
 function confirmarMatch(){
   if(!pendingMatch)return;
-  const fecha=document.getElementById('conf-fecha').value;
-  const modalidad=document.getElementById('conf-modalidad').value;
-  if(!fecha){alert('Selecciona una fecha tentativa');return}
-  const comp={
-    id:Date.now(),key:pendingMatch.key,
-    of:pendingMatch.of.org,ne:pendingMatch.ne.org,
-    tipo:pendingMatch.tipo,areas:pendingMatch.areas,
-    fecha,modalidad,status:'comprometido',
-    texto:generarTexto(pendingMatch,fecha,modalidad)
-  };
-  compromisos.push(comp);
-  closeMatchModal();
-  pendingMatch=null;
-  updateCompBadge();
+  const fecha=document.getElementById('conf-fecha').value,modalidad=document.getElementById('conf-modalidad').value;
+  if(!fecha){alert('Selecciona una fecha');return}
+  const d=new Date(fecha+'T12:00:00'),fs=d.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  const mod=modalidad==='virtual'?'virtual (videollamada)':'presencial';
+  const texto=`✅ *Compromiso — Banco de Tiempo Socioambiental*\n\n🤝 *${pendingMatch.of.org}* + *${pendingMatch.ne.org}*\n⏱ ${TIPOS[pendingMatch.tipo]?.icon||''} ${pendingMatch.tipo}\n📌 ${pendingMatch.areas.join(', ')}\n📅 ${fs} · ${mod} · máx. 1 hora\n\n_Cuando ocurra, saquen una foto y compártanla aquí_ 📸`;
+  compromisos.push({id:Date.now(),key:pendingMatch.key,of:pendingMatch.of.org,ne:pendingMatch.ne.org,tipo:pendingMatch.tipo,areas:pendingMatch.areas,fecha,modalidad,status:'comprometido',texto});
+  closeMatchModal();pendingMatch=null;updateCompBadge();
   renderMatches(calcMatches(cards.filter(c=>c.mode==='ofrece'),cards.filter(c=>c.mode==='necesita')));
   toast('Compromiso registrado ✓');
 }
 
-function generarTexto(m,fecha,modalidad){
-  const mod=modalidad==='virtual'?'virtual (videollamada)':'presencial';
-  const d=new Date(fecha+'T12:00:00');
-  const fechaStr=d.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
-  return `✅ *Compromiso de intercambio — Banco de Tiempo Socioambiental*\n\n🤝 *${m.of.org}* + *${m.ne.org}*\n⏱ Tipo: ${TIPOS[m.tipo]?.icon||''} ${m.tipo}\n📌 Área: ${m.areas.join(', ')}\n📅 Fecha tentativa: ${fechaStr}\n💻 Modalidad: ${mod} (máx. 1 hora)\n\n_Cuando el intercambio ocurra, saquen una foto juntos y compártanla aquí_ 📸`;
-}
-
 function updateCompBadge(){
-  const n=compromisos.length;
-  const b=document.getElementById('comp-badge');
-  b.textContent=n;b.style.display=n?'inline':'none';
+  const n=compromisos.length,b=document.getElementById('comp-badge');b.textContent=n;b.style.display=n?'inline':'none';
 }
 
 function renderCompromisos(){
   const list=document.getElementById('comp-list');
-  if(!compromisos.length){list.innerHTML='<div class="no-comp">aún no hay compromisos registrados<br><span style="font-size:12px;color:var(--hint)">los compromisos aparecen cuando confirmas un match</span></div>';return}
+  if(!compromisos.length){list.innerHTML='<div class="no-comp">aún no hay compromisos registrados</div>';return}
   list.innerHTML='';
   compromisos.forEach(comp=>{
-    const col=TIPOS[comp.tipo]||{icon:'✓',bg:'#E1F5EE'};
-    const d=new Date(comp.fecha+'T12:00:00');
-    const fechaStr=d.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
-    const div=document.createElement('div');
-    div.className='comp-card'+(comp.status==='completado'?' done':'');
-    div.innerHTML=`
-      <div class="comp-icon">${col.icon}</div>
-      <div class="comp-body">
-        <div class="comp-orgs">${comp.of} → ${comp.ne}</div>
-        <div class="comp-meta">${comp.tipo} · ${comp.areas.join(', ')}</div>
-        <div class="comp-fecha">📅 ${fechaStr} · ${comp.modalidad==='virtual'?'virtual':'presencial'} · máx. 1 hora</div>
-        <span class="comp-status status-${comp.status}">${comp.status==='completado'?'✓ completado':'pendiente'}</span>
-        <div class="comp-actions">
-          <button class="cbtn whatsapp" onclick="copiarWsp(${comp.id})">copiar mensaje WhatsApp</button>
-          ${comp.status!=='completado'?`<button class="cbtn green" onclick="marcarCompleto(${comp.id})">marcar como completado ✓</button>`:''}
-        </div>
-      </div>`;
+    const col=TIPOS[comp.tipo]||{icon:'✓'};
+    const d=new Date(comp.fecha+'T12:00:00'),fs=d.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+    const div=document.createElement('div');div.className='comp-card'+(comp.status==='completado'?' done':'');
+    div.innerHTML=`<div class="comp-icon">${col.icon}</div><div class="comp-body"><div class="comp-orgs">${comp.of} → ${comp.ne}</div><div class="comp-meta">${comp.tipo} · ${comp.areas.join(', ')}</div><div class="comp-meta">📅 ${fs} · ${comp.modalidad==='virtual'?'virtual':'presencial'} · máx. 1 hora</div><span class="comp-status ${comp.status==='completado'?'s-done':'s-pend'}">${comp.status==='completado'?'✓ completado':'pendiente'}</span><div class="comp-actions"><button class="cbtn w" onclick="copiarWsp(${comp.id})">copiar WhatsApp</button>${comp.status!=='completado'?`<button class="cbtn g" onclick="marcarCompleto(${comp.id})">marcar completado ✓</button>`:''}</div></div>`;
     list.appendChild(div);
   });
 }
 
 function copiarWsp(id){
-  const comp=compromisos.find(c=>c.id===id);
-  if(!comp)return;
-  navigator.clipboard.writeText(comp.texto).then(()=>toast('Mensaje copiado — pégalo en WhatsApp 📱')).catch(()=>{
-    prompt('Copia este mensaje:',comp.texto);
-  });
+  const c=compromisos.find(x=>x.id===id);if(!c)return;
+  navigator.clipboard.writeText(c.texto).then(()=>toast('Copiado — pégalo en WhatsApp 📱')).catch(()=>prompt('Copia:',c.texto));
 }
 
 function marcarCompleto(id){
-  const comp=compromisos.find(c=>c.id===id);
-  if(comp){
-    comp.status='completado';
-    comp.texto=comp.texto+'\n\n📸 *Intercambio completado* ✅';
-    document.getElementById('c-done').textContent=compromisos.filter(c=>c.status==='completado').length;
-    renderCompromisos();
-    toast('¡Intercambio completado! No olvides la foto 📸');
-  }
+  const c=compromisos.find(x=>x.id===id);if(c){c.status='completado';renderCompromisos();document.getElementById('c-done').textContent=compromisos.filter(x=>x.status==='completado').length;toast('¡Completado! No olvides la foto 📸')}
 }
 
 function confetti(){
-  const wrap=document.getElementById('cw');wrap.innerHTML='';
-  for(let i=0;i<65;i++){
-    const d=document.createElement('div');d.className='cf';
-    d.style.left=Math.random()*100+'%';d.style.top='-10px';
-    d.style.background=CONFETTI[Math.floor(Math.random()*CONFETTI.length)];
-    d.style.animationDuration=(.6+Math.random()*1.4)+'s';
-    d.style.animationDelay=(Math.random()*.6)+'s';
-    d.style.width=(7+Math.random()*7)+'px';d.style.height=(7+Math.random()*7)+'px';
-    wrap.appendChild(d);
-  }
+  const w=document.getElementById('cw');w.innerHTML='';
+  for(let i=0;i<60;i++){const d=document.createElement('div');d.className='cf';d.style.left=Math.random()*100+'%';d.style.top='-10px';d.style.background=CONF[Math.floor(Math.random()*CONF.length)];d.style.animationDuration=(.6+Math.random()*1.4)+'s';d.style.animationDelay=(Math.random()*.5)+'s';d.style.width=(7+Math.random()*7)+'px';d.style.height=(7+Math.random()*7)+'px';w.appendChild(d);}
 }
 
 function toast(msg){
-  const t=document.createElement('div');t.className='toast';t.textContent=msg;
-  document.body.appendChild(t);
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},2500);
 }
 
@@ -590,6 +436,8 @@ document.getElementById('overlay').addEventListener('click',function(e){if(e.tar
 document.getElementById('overlay-match').addEventListener('click',function(e){if(e.target===this)closeMatchModal()});
 document.getElementById('boom').addEventListener('click',function(e){if(e.target===this||e.target.classList.contains('cw'))closeBoom()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal();closeMatchModal();closeBoom()}});
+
+cargar();
 </script>
 </body>
 </html>
